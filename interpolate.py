@@ -3,7 +3,10 @@ import os, argparse
 import numpy as np
 import torch
 import imageio
-import legacy  # stylegan2-ada-pytorch の dnnlib.legacy
+import sys
+sys.path.append("/workspace/stylegan2-ada-pytorch") 
+
+from dnnlib import legacy
 
 def parse_args():
     p = argparse.ArgumentParser(description="StyleGAN2-ADA 潜在空間補間 & 動画生成")
