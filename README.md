@@ -18,7 +18,7 @@ https://github.com/justinpinkney/awesome-pretrained-stylegan2?tab=readme-ov-file
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/<your-username>/animeface-stylegan2-ada.git
+git clone https://github.com/Mainlst/animeface-stylegan2-ada.git
 cd animeface-stylegan2-ada
 
 # Docker イメージをビルド
