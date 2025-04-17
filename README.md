@@ -2,6 +2,10 @@
 
 このリポジトリは [NVIDIA の stylegan2-ada-pytorch](https://github.com/NVlabs/stylegan2-ada-pytorch) をサブモジュールとして組み込み、アニメ顔の**静止画生成**・**補間動画生成**・**多点補間動画生成**をワンストップで扱えるツールセットです！
 
+![animation](https://github.com/user-attachments/assets/2c4673ff-3d7a-4eac-b1d3-b0c1f24677f9)
+
+https://github.com/justinpinkney/awesome-pretrained-stylegan2?tab=readme-ov-file#anime-portraits
+
 ## ✨ 主な機能
 
 - ✅ `generate.py` : 学習済みモデルによる**単発静止画生成**
