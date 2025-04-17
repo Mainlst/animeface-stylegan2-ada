@@ -4,11 +4,13 @@ __pycache__/
 *.pkl
 *.zip
 
-# Docker
+# Docker logs
 *.log
 
-# データフォルダは無視
+# データフォルダは基本無視、特定フォルダのみ中身を除外
 data/*
 !data/pretrained/
 !data/samples/
 !data/anim_output/
+data/samples/*
+data/anim_output/*
