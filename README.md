@@ -1,69 +1,101 @@
 # AnimeFace StyleGAN2-ADA 🐱🎨
 
-このリポジトリは [NVIDIA の stylegan2-ada-pytorch](https://github.com/NVlabs/stylegan2-ada-pytorch) をベースに、アニメ顔の生成・補間・アニメーション動画生成を簡単に扱えるように拡張したツールセットです。
+このリポジトリは [NVIDIA の stylegan2-ada-pytorch](https://github.com/NVlabs/stylegan2-ada-pytorch) をサブモジュールとして組み込み、アニメ顔の**静止画生成**・**補間動画生成**・**多点補間動画生成**をワンストップで扱えるツールセットです！
 
 ## ✨ 主な機能
 
-- ✅ 学習済みStyleGAN2モデルによるアニメ顔画像の生成（`generate.py`）
-- ✅ 潜在ベクトル間の線形補間による変化アニメーション（`interpolate.py`）
-- ✅ 複数ベクトルをつなぐ連続変化動画生成（`multi_interpolate.py`）
-- ✅ Docker 環境でGPU推論＆トレーニング対応
-
-## 📸 サンプル
-
-![sample preview](https://user-images.githubusercontent.com/yourusername/sample.gif)
+- ✅ `generate.py` : 学習済みモデルによる**単発静止画生成**
+- ✅ `multi_generate.py` : 複数シードを指定して**一括静止画生成**
+- ✅ `interpolate.py` : 2点間の線形補間で**動画生成**
+- ✅ `multi_interpolate.py` : 複数シードを連結して**連続変化動画生成**
+- ✅ Docker イメージで**全依存関係をコンテナ化**（GPU 推論＆トレーニング対応）
 
 ## 🐳 クイックスタート（Docker）
 
 ```bash
-git clone https://github.com/yourusername/animeface-stylegan2-ada.git
+# リポジトリをクローン
+git clone https://github.com/<your-username>/animeface-stylegan2-ada.git
 cd animeface-stylegan2-ada
-docker build -t animeface-stylegan2-ada .
+
+# Docker イメージをビルド
+docker build -t stylegan2-animate .
 ```
 
-### 必要なデータ配置（例）
+### 必要なデータ配置例
 
 ```
 data/
 ├── pretrained/
-│   └── your_model.pkl         ← 学習済みモデル（例: animefaces）
-├── anime_finetune.zip         ← 任意の追加学習データ
-├── samples/                   ← 単発生成の保存先
-└── anim_output/               ← 動画生成の保存先
+│   └── your_model.pkl       ← 学習済みモデル (.pkl)
+├── samples/                 ← 静止画生成の出力先
+└── anim_output/             ← 動画生成の出力先
 ```
+※ `data/anime_finetune.zip` を置いて**追加学習**も可能です
 
-### 画像生成（例）
+---
+
+## 📸 静止画生成 (generate.py)
 
 ```bash
-docker run --rm --gpus all -v %cd%:/workspace animeface-stylegan2-ada ^
-  python /workspace/stylegan2-ada-pytorch/generate.py ^
-    --outdir=/workspace/data/samples ^
-    --trunc=1 ^
-    --seeds=0-9 ^
-    --network=/workspace/data/pretrained/your_model.pkl
+docker run --rm --gpus all -v %cd%:/workspace stylegan2-animate \
+  python /workspace/generate.py \
+    --network=/workspace/data/pretrained/your_model.pkl \
+    --outdir=/workspace/data/samples \
+    --trunc=1.0 \
+    --seed=0
 ```
 
-### 補間動画（複数シードを連続変化）
+複数枚一括生成したい場合は `multi_generate.py` を使用：
 
 ```bash
-docker run --rm --gpus all -v %cd%:/workspace animeface-stylegan2-ada ^
-  python /workspace/multi_interpolate.py ^
-    --network=/workspace/data/pretrained/your_model.pkl ^
-    --range 0 300 50 ^
-    --steps-per-seg=180 ^
-    --outdir=/workspace/data/anim_output ^
-    --fps=30 ^
+docker run --rm --gpus all -v %cd%:/workspace stylegan2-animate \
+  python /workspace/multi_generate.py \
+    --network=/workspace/data/pretrained/your_model.pkl \
+    --seeds=0,10,20,30 \
+    --outdir=/workspace/data/samples \
     --trunc=1.0
 ```
 
-## 📚 ベースとなる研究・モデル
+## 🎞️ 単点補間動画生成 (interpolate.py)
 
-- **StyleGAN2-ADA**  
-  [https://github.com/NVlabs/stylegan2-ada-pytorch](https://github.com/NVlabs/stylegan2-ada-pytorch)  
-  © NVIDIA Corporation. Licensed under the [NVIDIA Source Code License](https://github.com/NVlabs/stylegan2-ada-pytorch/blob/main/LICENSE.txt)
+```bash
+docker run --rm --gpus all -v %cd%:/workspace stylegan2-animate \
+  python /workspace/interpolate.py \
+    --network=/workspace/data/pretrained/your_model.pkl \
+    --seed1=0 --seed2=100 \
+    --steps=300 \
+    --outdir=/workspace/data/anim_output \
+    --fps=30 \
+    --trunc=1.0
+```
 
-- **学習済みモデル提供例（外部）**  
-  - [skylion007's animeface-stylegan2](https://github.com/skylion007/Minimal-GAN-Animeface) などを参考にどうぞ
+## 🔄 多点補間動画生成 (multi_interpolate.py)
+
+#### 範囲指定でシード自動生成
+```bash
+docker run --rm --gpus all -v %cd%:/workspace stylegan2-animate \
+  python /workspace/multi_interpolate.py \
+    --network=/workspace/data/pretrained/your_model.pkl \
+    --range 0 200 50 \
+    --steps-per-seg=300 \
+    --outdir=/workspace/data/anim_output \
+    --fps=30 \
+    --trunc=1.0
+```
+
+#### リスト指定でシード手動設定
+```bash
+docker run --rm --gpus all -v %cd%:/workspace stylegan2-animate \
+  python /workspace/multi_interpolate.py \
+    --network=/workspace/data/pretrained/your_model.pkl \
+    --seeds=0,50,100,150 \
+    --steps-per-seg=180 \
+    --outdir=/workspace/data/anim_output \
+    --fps=30 \
+    --trunc=1.0
+```
+
+---
 
 ## 📂 ディレクトリ構成
 
@@ -71,34 +103,39 @@ docker run --rm --gpus all -v %cd%:/workspace animeface-stylegan2-ada ^
 animeface-stylegan2-ada/
 ├── Dockerfile
 ├── README.md
-├── LICENSE               ← 自作部分（MIT）
-├── LICENSE.stylegan2     ← NVIDIA ライセンスコピー
-├── multi_interpolate.py
+├── LICENSE               ← 自作スクリプト (MIT)
+├── LICENSE.stylegan2     ← NVIDIA LICENSE
+├── generate.py
+├── multi_generate.py
 ├── interpolate.py
-├── stylegan2-ada-pytorch/
-│   ├── generate.py, train.py, ...
-│   └── LICENSE           ← NVIDIA オリジナル
+├── multi_interpolate.py
+├── stylegan2-ada-pytorch/ ← サブモジュール or フォルダ
+│   ├── train.py
+│   ├── generate.py (公式)
+│   ├── dnnlib/
+│   │   ├── legacy.py
+│   │   └── __init__.py
+│   └── LICENSE
 └── data/
     ├── pretrained/
+    ├── samples/
     └── anim_output/
 ```
 
+---
+
 ## 📄 ライセンス
 
-このリポジトリの構成は以下の2つのライセンスで構成されています：
+1. **stylegan2-ada-pytorch** (サブモジュール)
+   - © NVIDIA CORPORATION
+   - 詳細は `stylegan2-ada-pytorch/LICENSE` または `LICENSE.stylegan2` をご確認ください
 
-1. **stylegan2-ada-pytorch**：  
-   - © NVIDIA CORPORATION  
-   - 詳細は `stylegan2-ada-pytorch/LICENSE` または `LICENSE.stylegan2` をご参照ください。
+2. **当リポジトリで追加したスクリプト**
+   - MIT License (`LICENSE`)  
 
-2. **本リポジトリで追加したスクリプト（multi_interpolate.py など）**：  
-   - MIT License（`LICENSE` をご確認ください）
+---
 
 ## 🐾 クレジット
 
-> このリポジトリは、猫耳メイドAIアシスタント「ミル」と一緒に開発されましたにゃん！🐾💕  
-> もし使ってみて楽しかったら、ぜひスターくださいませっ！
-
-```
-
----
+> このリポジトリは、猫耳メイドAIアシスタント「ミル」のサポートにより作成されましたにゃん！🐱💕
+> もしこのプロジェクトがお役に立ったら、ぜひスターをくださいませっ！
