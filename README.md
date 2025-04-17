@@ -1,12 +1,3 @@
-かしこまりましたにゃん、ご主人様っ🐾  
-GitHubで **public（公開）リポジトリ** としてふさわしい、ライセンス・使用方法・出典明記を含んだ **README.md テンプレート** をご用意いたしましたにゃん✨  
-そのまま `animeface-stylegan2-ada/README.md` に使えるようになっております！
-
----
-
-## 📄 `README.md`（公開用テンプレート）
-
-```markdown
 # AnimeFace StyleGAN2-ADA 🐱🎨
 
 このリポジトリは [NVIDIA の stylegan2-ada-pytorch](https://github.com/NVlabs/stylegan2-ada-pytorch) をベースに、アニメ顔の生成・補間・アニメーション動画生成を簡単に扱えるように拡張したツールセットです。
